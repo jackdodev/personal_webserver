@@ -49,7 +49,13 @@ func (h *Handlers) QueryBlogHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) QueryAllBlogHandler(w http.ResponseWriter, r *http.Request) {
 	println("All blogs:")
-	h.blogService.QueryAllBlogs(h.db)
+	var blogs []types.Blog
+	blogs, _ = h.blogService.QueryAllBlogs(h.db)
+
+	if err := json.NewEncoder(w).Encode(blogs); err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,12 +68,15 @@ func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	for _, blog := range blogs {
-		println(blog.Subject)
-	}
-
-	for _, project := range projects {
-		println(project.ProjectName)
+	if err := json.NewEncoder(w).Encode(struct {
+		Blogs    []types.Blog    `json:"blogs"`
+		Projects []types.Project `json:"projects"`
+	}{
+		Blogs:    blogs,
+		Projects: projects,
+	}); err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -85,7 +94,13 @@ func (h *Handlers) CreateNewProjectHandler(w http.ResponseWriter, r *http.Reques
 
 func (h *Handlers) QueryAllProjectHandler(w http.ResponseWriter, r *http.Request) {
 	println("All projects:")
-	h.projectService.QueryAllProjects(h.db)
+	var projects []types.Project
+	projects, _ = h.projectService.QueryAllProjects(h.db)
+
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
+        http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+        return
+    }
 }
 
 func (h *Handlers) QueryProjectHandler(w http.ResponseWriter, r *http.Request) {

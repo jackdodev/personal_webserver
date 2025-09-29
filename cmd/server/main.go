@@ -13,7 +13,7 @@ const (
 	dbPort = 5432
 	dbUser = "jackdodev"
 	dbPassword = "wornr123"
-	dbName = "webpage_db"
+	dbName = "webpage"
 )
 
 func main() {

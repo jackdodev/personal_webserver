@@ -17,10 +17,10 @@ import (
 )
 
 type server struct {
-	db *gorm.DB
-	conn *http.Server
+	db       *gorm.DB
+	conn     *http.Server
 	handlers *handlers.Handlers
-	router *router
+	router   *router
 }
 
 func NewServer(db *gorm.DB) *server {
@@ -30,6 +30,7 @@ func NewServer(db *gorm.DB) *server {
 			Addr: ":8080",
 		},
 		handlers: handlers.NewHandlers(db),
+		router:   &router{},
 	}
 }
 
@@ -41,7 +42,7 @@ func (s *server) start() {
 	go func() {
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-		<- sigChan
+		<-sigChan
 
 		shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdownRelease()

@@ -26,7 +26,6 @@ func (b *BlogService) QueryBlog(db *gorm.DB, blogId string) (*types.BlogItem, er
 		return nil, err
 	}
 	db.First(&blog, "blog_id = ?", blogIdInInt)
-	println(blog.Subject)
 	return nil, nil	
 }
 
@@ -36,8 +35,6 @@ func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	for _, blog := range blogs {
-		println(blog.Subject)
-	}
+
 	return blogs, nil
 }

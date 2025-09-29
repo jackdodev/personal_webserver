@@ -26,7 +26,7 @@ func (p *ProjectService) QueryProject(db *gorm.DB, projectId string) (*types.Pro
 		return nil, err
 	}
 	db.First(&project, "project_id = ?", projectIdInInt)
-	println(project.ProjectName)
+
 	return nil, nil
 }
 
@@ -35,10 +35,6 @@ func (p *ProjectService) QueryAllProjects(db *gorm.DB) ([]types.Project, error) 
 	result := db.Find(&projects)
 	if result.Error != nil {
 		return nil, result.Error
-	}
-
-	for _, project := range projects {
-		println(project.ProjectName)
 	}
 
 	return projects, nil
