@@ -3,6 +3,9 @@ package services
 import (
 	"gorm.io/gorm"
 	"strconv"
+	"time"
+
+	"fmt"
 
 	types "go_webserv/internal/types"
 )
@@ -15,7 +18,20 @@ func InitProjectService() *ProjectService {
 	return &ProjectService{}
 }
 
-func (p *ProjectService) CreateNewProject(db *gorm.DB) error {
+func (p *ProjectService) CreateNewProject(db *gorm.DB, newProject types.ProjectItem) error {
+	err := db.Create(&types.Project{
+		ProjectID: Sha256Hex(fmt.Sprintf("%s-%d", newProject.Name, time.Now().UnixNano()))[:16],
+		Name:     newProject.Name,
+		ContentPath: newProject.ContentPath,
+		CreatedAt:   time.Now(),
+		LastModified: time.Now(),
+	}).Error
+
+	if err != nil {
+		println("Error creating project:", err)
+		return err
+	}
+
 	return nil
 }
 

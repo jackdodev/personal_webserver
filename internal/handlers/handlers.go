@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -27,15 +26,20 @@ func NewHandlers(db *gorm.DB) *Handlers {
 }
 
 func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) {
-	var blog types.Blog
+	var blog types.BlogItem
 	err := json.NewDecoder(r.Body).Decode(&blog)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	blog.CreatedAt = time.Now()
-	h.db.Create(&blog)
+	err = h.blogService.CreateNewBlog(h.db, blog)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *Handlers) QueryBlogHandler(w http.ResponseWriter, r *http.Request) {
@@ -81,15 +85,20 @@ func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateNewProjectHandler(w http.ResponseWriter, r *http.Request) {
-	var project types.Project
+	var project types.ProjectItem
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	project.CreatedAt = time.Now()
-	h.db.Create(&project)
+	err = h.projectService.CreateNewProject(h.db, project)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *Handlers) QueryAllProjectHandler(w http.ResponseWriter, r *http.Request) {

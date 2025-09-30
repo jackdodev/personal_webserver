@@ -3,6 +3,11 @@ package services
 import (
 	"gorm.io/gorm"
 	"strconv"
+	"time"
+
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 
 	types "go_webserv/internal/types"
 )
@@ -15,7 +20,25 @@ func InitBlogService() *BlogService {
 	return &BlogService{}
 }
 
-func (b *BlogService) CreateNewBlog(db *gorm.DB) error {
+func Sha256Hex(s string) string {
+	sum := sha256.Sum256([]byte(s))
+	return hex.EncodeToString(sum[:])
+}
+
+func (b *BlogService) CreateNewBlog(db *gorm.DB, newBlog types.BlogItem) error {
+	err := db.Create(&types.Blog{
+		BlogID: 	 Sha256Hex(fmt.Sprintf("%s-%d", newBlog.Subject, time.Now().UnixNano()))[:16],
+		Subject:     newBlog.Subject,
+		ContentPath: newBlog.ContentPath,
+		CreatedAt:   time.Now(),
+		LastModified: time.Now(),
+	}).Error
+
+	if err != nil {
+		println("Error creating blog:", err)
+		return err
+	}
+
 	return nil
 }
 
