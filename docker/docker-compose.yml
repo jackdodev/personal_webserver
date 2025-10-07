@@ -17,7 +17,9 @@ services:
     networks:
       - backend-network
   backend:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: go_backend
     environment:
       DB_HOST: db
