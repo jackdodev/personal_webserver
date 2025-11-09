@@ -17,13 +17,13 @@ CREATE TABLE IF NOT EXISTS projects (
 project_id varchar(255) PRIMARY KEY,
 name varchar(255) NOT NULL,
 content_path varchar(255) NOT NULL,
-created_at TIME NOT NULL,
-last_modified TIME NOT NULL
+created_at TIMESTAMP NOT NULL,
+last_modified TIMESTAMP NOT NULL
 );
 
 INSERT INTO projects (project_id, name, content_path, created_at, last_modified) VALUES (
-'proj1_id', 'proj1_name', 'proj1_content_path', '08:00:00', '08:00:00');
+'proj1_id', 'proj1_name', 'proj1_content_path', NOW(), NOW());
 INSERT INTO projects (project_id, name, content_path, created_at, last_modified) VALUES (
-'proj2_id', 'proj2_name', 'proj2_content_path', '09:00:00', '09:00:00');
+'proj2_id', 'proj2_name', 'proj2_content_path', NOW(), NOW());
 INSERT INTO projects (project_id, name, content_path, created_at, last_modified) VALUES (
-'proj3_id', 'proj3_name', 'proj3_content_path', '10:00:00', '10:00:00');
+'proj3_id', 'proj3_name', 'proj3_content_path', NOW(), NOW());

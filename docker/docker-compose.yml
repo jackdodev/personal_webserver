@@ -39,4 +39,3 @@ volumes:
 
 networks:
   backend-network:
-    driver: bridge
