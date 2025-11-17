@@ -66,10 +66,13 @@ func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
 	blogs, err := h.blogService.QueryAllBlogs(h.db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	
 	projects, err := h.projectService.QueryAllProjects(h.db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	if err := json.NewEncoder(w).Encode(struct {
