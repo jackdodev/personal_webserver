@@ -2,6 +2,7 @@ package types
 
 import (
 	"time"
+	"github.com/lib/pq"
 )
 
 type Blog struct {
@@ -10,6 +11,7 @@ type Blog struct {
 	ContentPath  string    `gorm:"not null" json:"content_path"`
 	CreatedAt    time.Time `gorm:"not null;" json:"created_at"`
 	LastModified time.Time `gorm:"not null;" json:"last_modified"`
+	Tags				 pq.StringArray  `gorm:"type:text[];not null;default:'{}'" json:"tags"`
 }
 
 type Project struct {
@@ -18,6 +20,7 @@ type Project struct {
 	ContentPath  string    `gorm:"not null" json:"content_path"`
 	CreatedAt    time.Time `gorm:"not null;" json:"created_at"`
 	LastModified time.Time `gorm:"not null;" json:"last_modified"`
+	Tags				 pq.StringArray  `gorm:"type:text[];not null;default:'{}'" json:"tags"`
 }
 
 type BlogItem struct {

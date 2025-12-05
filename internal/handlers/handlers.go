@@ -55,7 +55,7 @@ func (h *Handlers) QueryAllBlogHandler(w http.ResponseWriter, r *http.Request) {
 	println("All blogs:")
 	var blogs []types.Blog
 	blogs, _ = h.blogService.QueryAllBlogs(h.db)
-
+	print("blogs:", blogs)
 	if err := json.NewEncoder(w).Encode(blogs); err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return
@@ -68,7 +68,7 @@ func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	projects, err := h.projectService.QueryAllProjects(h.db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
