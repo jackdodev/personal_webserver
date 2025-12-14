@@ -40,6 +40,7 @@ func (r *router) New(handlers *handlers.Handlers) http.Handler {
 	muxr.HandleFunc("/blog", handlers.CreateNewBlogHandler).Methods("POST")
 	muxr.HandleFunc("/blog", handlers.QueryAllBlogHandler)
 	muxr.HandleFunc("/blog/{id:[0-9]+}", handlers.QueryBlogHandler)
+	muxr.HandleFunc("/blog/upload-link", handlers.RequestUploadLinkHandler).Methods("POST")
 
 	muxr.HandleFunc("/project", handlers.CreateNewProjectHandler).Methods("POST")
 	muxr.HandleFunc("/project", handlers.QueryAllProjectHandler)

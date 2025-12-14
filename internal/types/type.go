@@ -32,3 +32,14 @@ type ProjectItem struct {
 	Name        string `json:"name"`
 	ContentPath string `json:"content_path"`
 }
+
+type UploadLinkRequest struct {
+	FileName string `json:"file_name"`
+	ContentType string `json:"content_type"`
+	FileSize int64 `json:"file_size" default:"512000"`
+}
+
+type UploadLinkResponse struct {
+	UploadURL string `json:"upload_url"`
+	Key  string `json:"key"`
+}

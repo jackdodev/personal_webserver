@@ -45,22 +45,40 @@ func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) 
 func (h *Handlers) QueryBlogHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	blogId := vars["id"]
-	println("blogId:", blogId)
 	if blogId != "" {
 		h.blogService.QueryBlog(h.db, blogId)
 	}
 }
 
 func (h *Handlers) QueryAllBlogHandler(w http.ResponseWriter, r *http.Request) {
-	println("All blogs:")
 	var blogs []types.Blog
 	blogs, _ = h.blogService.QueryAllBlogs(h.db)
-	print("blogs:", blogs)
 	if err := json.NewEncoder(w).Encode(blogs); err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return
 	}
 }
+
+func (h *Handlers) RequestUploadLinkHandler(w http.ResponseWriter, r *http.Request) {
+	uploadLinkReq := types.UploadLinkRequest{}
+	err := json.NewDecoder(r.Body).Decode(&uploadLinkReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	link, err := h.blogService.GetUploadLink(h.db, uploadLinkReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(link); err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
+	}
+} 
 
 func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
 	blogs, err := h.blogService.QueryAllBlogs(h.db)

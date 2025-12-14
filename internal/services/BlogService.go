@@ -61,3 +61,8 @@ func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
 
 	return blogs, nil
 }
+
+func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {
+	// Placeholder implementation - in a real scenario, generate a signed URL from a cloud storage service.
+	return nil, nil
+}
