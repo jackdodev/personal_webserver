@@ -34,9 +34,9 @@ type ProjectItem struct {
 }
 
 type UploadLinkRequest struct {
-	FileName string `json:"file_name"`
-	ContentType string `json:"content_type"`
-	FileSize int64 `json:"file_size" default:"512000"`
+	BlogId string `json:"id"`
+	AuthorID string `json:"author_id"`
+	Content string `json:"content"`
 }
 
 type UploadLinkResponse struct {

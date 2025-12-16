@@ -66,6 +66,7 @@ func (h *Handlers) RequestUploadLinkHandler(w http.ResponseWriter, r *http.Reque
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	println("Received upload link request for BlogID:", uploadLinkReq.BlogId)
 
 	link, err := h.blogService.GetUploadLink(h.db, uploadLinkReq)
 	if err != nil {

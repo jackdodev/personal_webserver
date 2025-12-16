@@ -27,6 +27,7 @@ services:
       DB_USER: jackdodev
       DB_PASSWORD: wornr123
       DB_NAME: webpage
+      AWS_SHARED_CREDENTIALS_FILE: .aws/credentials
     ports:
       - "8080:8080"
     depends_on:

@@ -1,13 +1,19 @@
 package services
 
 import (
-	"gorm.io/gorm"
 	"strconv"
+	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 
 	types "go_webserv/internal/types"
 )
@@ -62,7 +68,35 @@ func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
 	return blogs, nil
 }
 
-func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {
-	// Placeholder implementation - in a real scenario, generate a signed URL from a cloud storage service.
-	return nil, nil
+func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {	
+	key := fmt.Sprintf("blogs:%s:%s", req.AuthorID, req.BlogId)
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-esat-2"),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	svc := s3.New(sess);
+
+	s3Req, err := svc.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: aws.String("jackdodev-webpage-posts"),
+		Key:    aws.String(key),
+		Body:	  strings.NewReader("This is the content of the object"),
+	})
+
+	if err != nil {
+		println(err)
+
+	str, err := s3Req.Presign(5 * time.Minute)
+
+	if err != nil {
+		println(err)
+	}
+
+	return &types.UploadLinkResponse{
+		UploadURL: str,
+		Key:       key,
+	}, err
 }
