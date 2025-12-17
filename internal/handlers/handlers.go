@@ -74,7 +74,6 @@ func (h *Handlers) RequestUploadLinkHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(link); err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return

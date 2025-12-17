@@ -2,7 +2,6 @@ package services
 
 import (
 	"strconv"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -12,6 +11,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
@@ -70,8 +70,10 @@ func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
 
 func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {	
 	key := fmt.Sprintf("blogs:%s:%s", req.AuthorID, req.BlogId)
+	creds := credentials.NewSharedCredentials("/app/.aws/credentials", "default")
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-esat-2"),
+		Region: aws.String("us-east-2"),
+		Credentials: creds,
 	})
 
 	if err != nil {
@@ -80,23 +82,21 @@ func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*
 
 	svc := s3.New(sess);
 
-	s3Req, err := svc.PutObjectRequest(&s3.PutObjectInput{
+	putReq, _ := svc.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String("jackdodev-webpage-posts"),
 		Key:    aws.String(key),
-		Body:	  strings.NewReader("This is the content of the object"),
 	})
 
-	if err != nil {
-		println(err)
+	str, err := putReq.Presign(5 * time.Minute)
 
-	str, err := s3Req.Presign(5 * time.Minute)
-
+	println("Generated presigned URL:", str)
 	if err != nil {
-		println(err)
+		println(err.Error())
+		return nil, err
 	}
 
 	return &types.UploadLinkResponse{
 		UploadURL: str,
 		Key:       key,
-	}, err
+	}, nil
 }
