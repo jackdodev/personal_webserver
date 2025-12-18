@@ -69,7 +69,7 @@ func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
 }
 
 func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {	
-	key := fmt.Sprintf("blogs:%s:%s", req.AuthorID, req.BlogId)
+	key := req.Key
 	creds := credentials.NewSharedCredentials("/app/.aws/credentials", "default")
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-2"),

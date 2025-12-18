@@ -34,9 +34,7 @@ type ProjectItem struct {
 }
 
 type UploadLinkRequest struct {
-	BlogId string `json:"id"`
-	AuthorID string `json:"author_id"`
-	Content string `json:"content"`
+	Key string `json:"key"`
 }
 
 type UploadLinkResponse struct {
