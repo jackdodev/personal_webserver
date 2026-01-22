@@ -8,7 +8,6 @@ import (
 
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -19,7 +18,6 @@ import (
 )
 
 type BlogService struct {
-
 }
 
 func InitBlogService() *BlogService {
@@ -31,13 +29,14 @@ func Sha256Hex(s string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func (b *BlogService) CreateNewBlog(db *gorm.DB, newBlog types.BlogItem) error {
+func (b *BlogService) CreateNewBlog(db *gorm.DB, newBlog types.BlogItem, bId string) error {
 	err := db.Create(&types.Blog{
-		BlogID: 	 Sha256Hex(fmt.Sprintf("%s-%d", newBlog.Subject, time.Now().UnixNano()))[:16],
-		Subject:     newBlog.Subject,
-		ContentPath: newBlog.ContentPath,
-		CreatedAt:   time.Now(),
+		BlogID:       bId,
+		AuthorID:     newBlog.AuthorID,
+		Subject:      newBlog.Subject,
+		CreatedAt:    time.Now(),
 		LastModified: time.Now(),
+		Tags:         newBlog.Tags,
 	}).Error
 
 	if err != nil {
@@ -55,7 +54,7 @@ func (b *BlogService) QueryBlog(db *gorm.DB, blogId string) (*types.BlogItem, er
 		return nil, err
 	}
 	db.First(&blog, "blog_id = ?", blogIdInInt)
-	return nil, nil	
+	return nil, nil
 }
 
 func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
@@ -68,11 +67,11 @@ func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
 	return blogs, nil
 }
 
-func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {	
+func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {
 	key := req.Key
 	creds := credentials.NewSharedCredentials("/app/.aws/credentials", "default")
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-2"),
+		Region:      aws.String("us-east-2"),
 		Credentials: creds,
 	})
 
@@ -80,7 +79,7 @@ func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*
 		return nil, err
 	}
 
-	svc := s3.New(sess);
+	svc := s3.New(sess)
 
 	putReq, _ := svc.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String("jackdodev-webpage-posts"),

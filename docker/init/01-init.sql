@@ -1,18 +1,18 @@
 CREATE TABLE IF NOT EXISTS blogs (                                                                  
   blog_id varchar(255) PRIMARY KEY,
+  author_id varchar(255) NOT NULL,
   subject varchar(255) NOT NULL,
-  content_path varchar(255) NOT NULL,
   created_at TIMESTAMP NOT NULL,
   last_modified TIMESTAMP NOT NULL,
   tags text[] DEFAULT '{}' NOT NULL
 );
 
-INSERT INTO blogs (blog_id, subject, content_path, created_at, last_modified, tags) VALUES (
-'blog1_id', 'blog1_name', 'blog1_content_path', NOW(), NOW(), ARRAY['intro','go']);
-INSERT INTO blogs (blog_id, subject, content_path, created_at, last_modified, tags) VALUES (
-'blog2_id', 'blog2_name', 'blog2_content_path', NOW(), NOW(), ARRAY['tutorial','db']);
-INSERT INTO blogs (blog_id, subject, content_path, created_at, last_modified, tags) VALUES (
-'blog3_id', 'blog3_name', 'blog3_content_path', NOW(), NOW(), ARRAY['advanced','web']);
+INSERT INTO blogs (blog_id, author_id, subject, created_at, last_modified, tags) VALUES (
+'blog1_id', 'author1', 'blog1_name', NOW(), NOW(), ARRAY['intro','go']);
+INSERT INTO blogs (blog_id, author_id, subject, created_at, last_modified, tags) VALUES (
+'blog2_id', 'author2', 'blog2_name', NOW(), NOW(), ARRAY['tutorial','db']);
+INSERT INTO blogs (blog_id, author_id, subject, created_at, last_modified, tags) VALUES (
+'blog3_id', 'author3', 'blog3_name', NOW(), NOW(), ARRAY['advanced','web']);
 
 CREATE TABLE IF NOT EXISTS projects (
 project_id varchar(255) PRIMARY KEY,
@@ -28,4 +28,4 @@ INSERT INTO projects (project_id, name, content_path, created_at, last_modified,
 INSERT INTO projects (project_id, name, content_path, created_at, last_modified, tags) VALUES (
 'proj2_id', 'proj2_name', 'proj2_content_path', NOW(), NOW(), ARRAY['db','sql']);
 INSERT INTO projects (project_id, name, content_path, created_at, last_modified, tags) VALUES (
-'proj3_id', 'proj3_name', 'proj3_content_path', NOW(), NOW(), ARRAY['api','rest']);
+'proj3_id', 'proj3_name', 'proj3_content_path', NOW(), NOW(), ARRAY['api','rest']);  

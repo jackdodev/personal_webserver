@@ -26,14 +26,16 @@ func NewHandlers(db *gorm.DB) *Handlers {
 }
 
 func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
 	var blog types.BlogItem
+	var bId = vars["id"]
 	err := json.NewDecoder(r.Body).Decode(&blog)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = h.blogService.CreateNewBlog(h.db, blog)
+	err = h.blogService.CreateNewBlog(h.db, blog, bId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -66,7 +68,7 @@ func (h *Handlers) RequestUploadLinkHandler(w http.ResponseWriter, r *http.Reque
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	println("Received upload link request for BlogID:", uploadLinkReq.BlogId)
+	println("Received upload link request for BlogID:", uploadLinkReq.Key)
 
 	link, err := h.blogService.GetUploadLink(h.db, uploadLinkReq)
 	if err != nil {
