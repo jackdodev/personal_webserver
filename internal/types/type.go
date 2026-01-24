@@ -8,7 +8,7 @@ import (
 
 type Blog struct {
 	BlogID       string         `gorm:"primaryKey;not null" json:"blog_id"`
-	AuthorID		 string         `gorm:"not null" json:"author_id"`
+	AuthorID     string         `gorm:"not null" json:"author_id"`
 	Subject      string         `gorm:"not null" json:"subject"`
 	CreatedAt    time.Time      `gorm:"not null;" json:"created_at"`
 	LastModified time.Time      `gorm:"not null;" json:"last_modified"`
@@ -25,14 +25,25 @@ type Project struct {
 }
 
 type BlogItem struct {
-	AuthorID string   `json:"author_id"`
-	Subject  string   `json:"subject"`
-	Tags     []string `json:"tags"`
+	AuthorID     string    `json:"author_id"`
+	Subject      string    `json:"subject"`
+	CreatedAt    time.Time `json:"created_at"`
+	LastModified time.Time `json:"last_modified"`
+	Tags         []string  `json:"tags"`
 }
 
 type ProjectItem struct {
 	Name        string `json:"name"`
 	ContentPath string `json:"content_path"`
+}
+
+type DownloadLinkRequest struct {
+	Key string `json:"key"`
+}
+
+type DownloadLinkResponse struct {
+	DownloadURL string `json:"download_url"`
+	Key         string `json:"key"`
 }
 
 type UploadLinkRequest struct {

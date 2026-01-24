@@ -38,9 +38,11 @@ func (r *router) New(handlers *handlers.Handlers) http.Handler {
 	muxr.HandleFunc("/", handlers.QueryAllHandler)
 
 	muxr.HandleFunc("/blog/new/{id}", handlers.CreateNewBlogHandler).Methods("POST")
-	muxr.HandleFunc("/blog", handlers.QueryAllBlogHandler).Methods("GET")
-	muxr.HandleFunc("/blog/upload-link", handlers.RequestUploadLinkHandler).Methods("POST")
 	muxr.HandleFunc("/blog/{id}", handlers.QueryBlogHandler).Methods("GET")
+	muxr.HandleFunc("/blog", handlers.QueryAllBlogHandler).Methods("GET")
+	muxr.HandleFunc("/blog/download-link", handlers.RequestDownloadLinkHandler).Methods("POST")
+	muxr.HandleFunc("/blog/upload-link", handlers.RequestUploadLinkHandler).Methods("POST")
+	
 	muxr.HandleFunc("/blog/{id}", handlers.CreateNewBlogHandler).Methods("POST")
 	
 

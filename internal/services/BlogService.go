@@ -1,7 +1,6 @@
 package services
 
 import (
-	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -49,12 +48,29 @@ func (b *BlogService) CreateNewBlog(db *gorm.DB, newBlog types.BlogItem, bId str
 
 func (b *BlogService) QueryBlog(db *gorm.DB, blogId string) (*types.BlogItem, error) {
 	blog := types.Blog{}
-	blogIdInInt, err := strconv.Atoi(blogId)
-	if err != nil {
-		return nil, err
+	
+	println("Querying blog with ID:", blogId)
+
+	result := db.First(&blog, "blog_id = ?", blogId)
+	if result.Error != nil {
+		println("Error querying blog:", result.Error)
+		return nil, result.Error;
 	}
-	db.First(&blog, "blog_id = ?", blogIdInInt)
-	return nil, nil
+
+	println("Found blog:", blog.BlogID)
+
+	if result.RowsAffected == 0 {
+		return nil, gorm.ErrRecordNotFound;
+	}
+
+	blogItem := &types.BlogItem{
+		AuthorID:   blog.AuthorID,
+		Subject:    blog.Subject,
+		CreatedAt:  blog.CreatedAt,
+		Tags:       blog.Tags,
+	}
+	
+	return blogItem, nil
 }
 
 func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
@@ -65,6 +81,39 @@ func (b *BlogService) QueryAllBlogs(db *gorm.DB) ([]types.Blog, error) {
 	}
 
 	return blogs, nil
+}
+
+func (b *BlogService) GetDownloadLink(db *gorm.DB, req types.DownloadLinkRequest) (*types.DownloadLinkResponse, error) {
+	key := req.Key
+	creds := credentials.NewSharedCredentials("/app/.aws/credentials", "default")
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("us-east-2"),
+		Credentials: creds,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	svc := s3.New(sess)
+
+	getReq, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String("jackdodev-webpage-posts"),
+		Key:    aws.String(key),
+	})
+
+	str, err := getReq.Presign(5 * time.Minute)
+	
+	println("Generated presigned URL:", str)
+	if err != nil {
+		println(err.Error())
+		return nil, err
+	}
+
+	return &types.DownloadLinkResponse{
+		DownloadURL: str,
+		Key:         key,
+	}, nil
 }
 
 func (b *BlogService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {

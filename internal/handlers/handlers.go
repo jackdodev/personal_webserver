@@ -47,8 +47,13 @@ func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) 
 func (h *Handlers) QueryBlogHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	blogId := vars["id"]
+	println("blogId:", blogId)
 	if blogId != "" {
-		h.blogService.QueryBlog(h.db, blogId)
+		blogItem, _ := h.blogService.QueryBlog(h.db, blogId)
+		if err := json.NewEncoder(w).Encode(blogItem); err != nil {
+			http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -56,6 +61,27 @@ func (h *Handlers) QueryAllBlogHandler(w http.ResponseWriter, r *http.Request) {
 	var blogs []types.Blog
 	blogs, _ = h.blogService.QueryAllBlogs(h.db)
 	if err := json.NewEncoder(w).Encode(blogs); err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handlers) RequestDownloadLinkHandler(w http.ResponseWriter, r *http.Request) {
+	downloadLinkReq := types.DownloadLinkRequest{}
+	err := json.NewDecoder(r.Body).Decode(&downloadLinkReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	println("Received download link request for BlogID:", downloadLinkReq.Key)
+
+	link, err := h.blogService.GetDownloadLink(h.db, downloadLinkReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(link); err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return
 	}
