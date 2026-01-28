@@ -16,16 +16,16 @@ INSERT INTO blogs (blog_id, author_id, subject, created_at, last_modified, tags)
 
 CREATE TABLE IF NOT EXISTS projects (
 project_id varchar(255) PRIMARY KEY,
-name varchar(255) NOT NULL,
-content_path varchar(255) NOT NULL,
+author_id varchar(255) NOT NULL,
+project_name varchar(255) NOT NULL,
 created_at TIMESTAMP NOT NULL,
 last_modified TIMESTAMP NOT NULL,
 tags text[] DEFAULT '{}' NOT NULL
 );
 
-INSERT INTO projects (project_id, name, content_path, created_at, last_modified, tags) VALUES (
-'proj1_id', 'proj1_name', 'proj1_content_path', NOW(), NOW(), ARRAY['web','go']);
-INSERT INTO projects (project_id, name, content_path, created_at, last_modified, tags) VALUES (
-'proj2_id', 'proj2_name', 'proj2_content_path', NOW(), NOW(), ARRAY['db','sql']);
-INSERT INTO projects (project_id, name, content_path, created_at, last_modified, tags) VALUES (
-'proj3_id', 'proj3_name', 'proj3_content_path', NOW(), NOW(), ARRAY['api','rest']);  
+INSERT INTO projects (project_id, author_id, project_name, created_at, last_modified, tags) VALUES (
+'proj1_id', 'author1', 'proj1_name', NOW(), NOW(), ARRAY['web','go']);
+INSERT INTO projects (project_id, author_id, project_name, created_at, last_modified, tags) VALUES (
+'proj2_id', 'author2', 'proj2_name', NOW(), NOW(), ARRAY['db','sql']);
+INSERT INTO projects (project_id, author_id, project_name, created_at, last_modified, tags) VALUES (
+'proj3_id', 'author3', 'proj3_name', NOW(), NOW(), ARRAY['api','rest']);

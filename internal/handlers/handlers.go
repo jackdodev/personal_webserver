@@ -47,7 +47,6 @@ func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) 
 func (h *Handlers) QueryBlogHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	blogId := vars["id"]
-	println("blogId:", blogId)
 	if blogId != "" {
 		blogItem, _ := h.blogService.QueryBlog(h.db, blogId)
 		if err := json.NewEncoder(w).Encode(blogItem); err != nil {

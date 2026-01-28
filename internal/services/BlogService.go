@@ -48,28 +48,26 @@ func (b *BlogService) CreateNewBlog(db *gorm.DB, newBlog types.BlogItem, bId str
 
 func (b *BlogService) QueryBlog(db *gorm.DB, blogId string) (*types.BlogItem, error) {
 	blog := types.Blog{}
-	
+
 	println("Querying blog with ID:", blogId)
 
 	result := db.First(&blog, "blog_id = ?", blogId)
 	if result.Error != nil {
 		println("Error querying blog:", result.Error)
-		return nil, result.Error;
+		return nil, result.Error
 	}
 
-	println("Found blog:", blog.BlogID)
-
 	if result.RowsAffected == 0 {
-		return nil, gorm.ErrRecordNotFound;
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	blogItem := &types.BlogItem{
-		AuthorID:   blog.AuthorID,
-		Subject:    blog.Subject,
-		CreatedAt:  blog.CreatedAt,
-		Tags:       blog.Tags,
+		AuthorID:  blog.AuthorID,
+		Subject:   blog.Subject,
+		CreatedAt: blog.CreatedAt,
+		Tags:      blog.Tags,
 	}
-	
+
 	return blogItem, nil
 }
 
@@ -103,7 +101,7 @@ func (b *BlogService) GetDownloadLink(db *gorm.DB, req types.DownloadLinkRequest
 	})
 
 	str, err := getReq.Presign(5 * time.Minute)
-	
+
 	println("Generated presigned URL:", str)
 	if err != nil {
 		println(err.Error())

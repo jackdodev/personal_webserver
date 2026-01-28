@@ -17,8 +17,8 @@ type Blog struct {
 
 type Project struct {
 	ProjectID    string         `gorm:"primaryKey;not null" json:"project_id"`
-	Name         string         `gorm:"not null" json:"name"`
-	ContentPath  string         `gorm:"not null" json:"content_path"`
+	AuthorID     string         `gorm:"not null" json:"author_id"`
+	ProjectName  string         `gorm:"not null" json:"project_name"`
 	CreatedAt    time.Time      `gorm:"not null;" json:"created_at"`
 	LastModified time.Time      `gorm:"not null;" json:"last_modified"`
 	Tags         pq.StringArray `gorm:"type:text[];not null;default:'{}'" json:"tags"`
@@ -33,8 +33,11 @@ type BlogItem struct {
 }
 
 type ProjectItem struct {
-	Name        string `json:"name"`
-	ContentPath string `json:"content_path"`
+	AuthorID		string `json:"author_id"`
+	ProjectName		string `json:"project_name"`
+	CreatedAt    time.Time `json:"created_at"`
+	LastModified time.Time `json:"last_modified"`
+	Tags         []string  `json:"tags"`
 }
 
 type DownloadLinkRequest struct {
