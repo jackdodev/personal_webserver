@@ -65,7 +65,7 @@ func (h *Handlers) QueryAllBlogHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handlers) RequestDownloadLinkHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) FileDownloadLinkHandler(w http.ResponseWriter, r *http.Request) {
 	downloadLinkReq := types.DownloadLinkRequest{}
 	err := json.NewDecoder(r.Body).Decode(&downloadLinkReq)
 	if err != nil {
@@ -86,7 +86,7 @@ func (h *Handlers) RequestDownloadLinkHandler(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (h *Handlers) RequestUploadLinkHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) FileUploadLinkHandler(w http.ResponseWriter, r *http.Request) {
 	uploadLinkReq := types.UploadLinkRequest{}
 	err := json.NewDecoder(r.Body).Decode(&uploadLinkReq)
 	if err != nil {
@@ -133,14 +133,16 @@ func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateNewProjectHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
 	var project types.ProjectItem
+	var pId = vars["id"]
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = h.projectService.CreateNewProject(h.db, project)
+	err = h.projectService.CreateNewProject(h.db, project, pId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
