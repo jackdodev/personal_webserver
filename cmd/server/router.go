@@ -37,11 +37,15 @@ func (r *router) New(handlers *handlers.Handlers) http.Handler {
 	muxr := mux.NewRouter()
 	muxr.HandleFunc("/", handlers.QueryAllHandler)
 
-	muxr.HandleFunc("/blog/new/{id}", handlers.CreateNewBlogHandler).Methods("POST")
+	muxr.HandleFunc("/post/{id}", handlers.QueryPostHandler).Methods("GET")
+	muxr.HandleFunc("/post/{id}", handlers.CreatePostHandler).Methods("POST")
+	muxr.HandleFunc("/post", handlers.QueryAllPostHandler).Methods("GET")
+
+	muxr.HandleFunc("/blog/{id}", handlers.CreateNewBlogHandler).Methods("POST")
 	muxr.HandleFunc("/blog/{id}", handlers.QueryBlogHandler).Methods("GET")
 	muxr.HandleFunc("/blog", handlers.QueryAllBlogHandler).Methods("GET")
 
-	muxr.HandleFunc("/project/new/{id}", handlers.CreateNewProjectHandler).Methods("POST")
+	muxr.HandleFunc("/project/{id}", handlers.CreateNewProjectHandler).Methods("POST")
 	muxr.HandleFunc("/project/{id}", handlers.QueryProjectHandler).Methods("GET")
 	muxr.HandleFunc("/project", handlers.QueryAllProjectHandler).Methods("GET")
 

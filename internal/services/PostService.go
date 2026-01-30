@@ -5,75 +5,87 @@ import (
 
 	"gorm.io/gorm"
 
-	types "go_webserv/internal/types"
+	"crypto/sha256"
+	"encoding/hex"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+
+	types "go_webserv/internal/types"
 )
 
-type ProjectService struct {
+type PostService struct {
+	dbService *DbService
 }
 
-func InitProjectService() *ProjectService {
-	return &ProjectService{}
+func InitPostService(dbService *DbService) *PostService {
+	return &PostService{
+		dbService: dbService,
+	}
 }
 
-func (p *ProjectService) CreateNewProject(db *gorm.DB, newProject types.ProjectItem, pId string) error {
-	err := db.Create(&types.Project{
-		ProjectID:    pId,
-		AuthorID:     newProject.AuthorID,
-		ProjectName:  newProject.ProjectName,
+func Sha256Hex(s string) string {
+	sum := sha256.Sum256([]byte(s))
+	return hex.EncodeToString(sum[:])
+}
+
+func (b *PostService) CreateNewPost(db *gorm.DB, newBlog types.PostItem, id string) error {
+	blog := types.Post{
+		PostID:       "blg:" + id,
+		AuthorID:     newBlog.AuthorID,
+		Title:        newBlog.Title,
 		CreatedAt:    time.Now(),
 		LastModified: time.Now(),
-	}).Error
+		Tags:         newBlog.Tags,
+	}
+
+	err := b.dbService.doInsert(db, &blog)
 
 	if err != nil {
-		println("Error creating project:", err)
+		println("Error creating post:", err)
 		return err
 	}
 
 	return nil
 }
 
-func (p *ProjectService) QueryProject(db *gorm.DB, projectId string) (*types.ProjectItem, error) {
-	project := types.Project{}
+func (b *PostService) QueryPost(db *gorm.DB, id string) (*types.PostItem, error) {
+	post := types.Post{}
 
-	println("Querying project with ID:", projectId)
-
-	result := db.First(&project, "project_id = ?", projectId)
-	if result.Error != nil {
-		println("Error querying project:", result.Error)
-		return nil, result.Error
+	err := b.dbService.doQueryByID(db, &post, id)
+	if err != nil {
+		return nil, err
 	}
 
-	if result.RowsAffected == 0 {
+	if post.PostID == "" {
 		return nil, gorm.ErrRecordNotFound
 	}
 
-	projectItem := &types.ProjectItem{
-		AuthorID:     project.AuthorID,
-		ProjectName:  project.ProjectName,
-		CreatedAt:    project.CreatedAt,
-		LastModified: project.LastModified,
-		Tags:         project.Tags,
+	blogItem := &types.PostItem{
+		AuthorID:  post.AuthorID,
+		Title:     post.Title,
+		CreatedAt: post.CreatedAt,
+		Tags:      post.Tags,
 	}
 
-	return projectItem, nil
+	return blogItem, nil
 }
 
-func (p *ProjectService) QueryAllProjects(db *gorm.DB) ([]types.Project, error) {
-	var projects []types.Project
-	result := db.Find(&projects)
+func (b *PostService) QueryAllBlogs(db *gorm.DB) ([]types.PostItem, error) {
+	var posts []types.Post
+	result := db.Find(&posts)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return projects, nil
+	
+
+	return posts, nil
 }
 
-func (p *ProjectService) GetDownloadLink(db *gorm.DB, req types.DownloadLinkRequest) (*types.DownloadLinkResponse, error) {
+func (b *PostService) GetDownloadLink(db *gorm.DB, req types.DownloadLinkRequest) (*types.DownloadLinkResponse, error) {
 	key := req.Key
 	creds := credentials.NewSharedCredentials("/app/.aws/credentials", "default")
 	sess, err := session.NewSession(&aws.Config{
@@ -106,7 +118,7 @@ func (p *ProjectService) GetDownloadLink(db *gorm.DB, req types.DownloadLinkRequ
 	}, nil
 }
 
-func (p *ProjectService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {
+func (b *PostService) GetUploadLink(db *gorm.DB, req types.UploadLinkRequest) (*types.UploadLinkResponse, error) {
 	key := req.Key
 	creds := credentials.NewSharedCredentials("/app/.aws/credentials", "default")
 	sess, err := session.NewSession(&aws.Config{

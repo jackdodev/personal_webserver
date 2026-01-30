@@ -12,22 +12,20 @@ import (
 )
 
 type Handlers struct {
-	db *gorm.DB
-	blogService *services.BlogService
-	projectService *services.ProjectService
+	postService *services.PostService
+	awsService  *services.AwsService
 }
 
 func NewHandlers(db *gorm.DB) *Handlers {
 	return &Handlers{
-		db: db,
-		blogService: services.InitBlogService(),
-		projectService: services.InitProjectService(),
+		postService:    services.InitPostService(services.InitDbService(db)),
+		awsService: services.InitAwsService(),
 	}
 }
 
 func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	var blog types.BlogItem
+	var blog types.PostItem
 	var bId = vars["id"]
 	err := json.NewDecoder(r.Body).Decode(&blog)
 	if err != nil {
@@ -105,7 +103,7 @@ func (h *Handlers) FileUploadLinkHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return
 	}
-} 
+}
 
 func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
 	blogs, err := h.blogService.QueryAllBlogs(h.db)
@@ -157,9 +155,9 @@ func (h *Handlers) QueryAllProjectHandler(w http.ResponseWriter, r *http.Request
 	projects, _ = h.projectService.QueryAllProjects(h.db)
 
 	if err := json.NewEncoder(w).Encode(projects); err != nil {
-        http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
-        return
-    }
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *Handlers) QueryProjectHandler(w http.ResponseWriter, r *http.Request) {
