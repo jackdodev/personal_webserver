@@ -1,8 +1,6 @@
 package services
 
 import (
-	"strings"
-
 	"gorm.io/gorm"
 
 	types "go_webserv/internal/types"
@@ -18,8 +16,8 @@ func InitDbService(db *gorm.DB) *DbService {
 	}
 }
 
-func (d *DbService) doInsert(db *gorm.DB, record interface{}) error {
-	err := db.Create(record).Error
+func (d *DbService) doInsert(record *types.Post) error {
+	err := d.db.Create(record).Error
 	if err != nil {
 		println("[DbService] Error inserting record:", err)
 		return err
@@ -28,8 +26,8 @@ func (d *DbService) doInsert(db *gorm.DB, record interface{}) error {
 	return nil
 }
 
-func (d *DbService) doQueryByID(db *gorm.DB, record interface{}, id string) error {
-	if err := db.First(record, id).Error; err != nil {
+func (d *DbService) doQueryByID(record *types.Post, id string) error {
+	if err := d.db.First(record, id).Error; err != nil {
 		println("[DbService] Error querying record by ID:", err)
 
 		return err
@@ -38,8 +36,8 @@ func (d *DbService) doQueryByID(db *gorm.DB, record interface{}, id string) erro
 	return nil
 }
 
-func (d *DbService) doQueryAll(db *gorm.DB, posts []interface{}, ) error {
-	if err := db.Find(&posts).Error; err != nil {
+func (d *DbService) doQueryAll(posts []types.Post, postType types.PostType) error {
+	if err := d.db.Find(&posts).Error; err != nil {
 		println("[DbService] Error querying all records:", err)
 	
 		return err

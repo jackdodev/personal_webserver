@@ -18,22 +18,22 @@ type Handlers struct {
 
 func NewHandlers(db *gorm.DB) *Handlers {
 	return &Handlers{
-		postService:    services.InitPostService(services.InitDbService(db)),
-		awsService: services.InitAwsService(),
+		postService: services.InitPostService(services.InitDbService(db)),
+		awsService:  services.InitAwsService(),
 	}
 }
 
-func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	var blog types.PostItem
+	var post types.PostItem
 	var bId = vars["id"]
-	err := json.NewDecoder(r.Body).Decode(&blog)
+	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = h.blogService.CreateNewBlog(h.db, blog, bId)
+	err = h.postService.CreateNewPost(post, bId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -42,22 +42,33 @@ func (h *Handlers) CreateNewBlogHandler(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *Handlers) QueryBlogHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) QueryPostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	blogId := vars["id"]
-	if blogId != "" {
-		blogItem, _ := h.blogService.QueryBlog(h.db, blogId)
-		if err := json.NewEncoder(w).Encode(blogItem); err != nil {
+	
+	id := vars["id"]
+	postType := parsePostType(vars["type"])
+
+	if id != "" {
+		postItem, _ := h.postService.QueryPost(id, postType)
+		if err := json.NewEncoder(w).Encode(postItem); err != nil {
 			http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 			return
 		}
 	}
 }
 
-func (h *Handlers) QueryAllBlogHandler(w http.ResponseWriter, r *http.Request) {
-	var blogs []types.Blog
-	blogs, _ = h.blogService.QueryAllBlogs(h.db)
-	if err := json.NewEncoder(w).Encode(blogs); err != nil {
+func (h *Handlers) QueryAllPostHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	
+	postType := parsePostType(vars["type"])
+
+	posts, err := h.postService.QueryAllPosts(postType)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return
 	}
@@ -70,9 +81,8 @@ func (h *Handlers) FileDownloadLinkHandler(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	println("Received download link request for BlogID:", downloadLinkReq.Key)
 
-	link, err := h.blogService.GetDownloadLink(h.db, downloadLinkReq)
+	link, err := h.awsService.GetDownloadLink(downloadLinkReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -91,9 +101,8 @@ func (h *Handlers) FileUploadLinkHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	println("Received upload link request for BlogID:", uploadLinkReq.Key)
 
-	link, err := h.blogService.GetUploadLink(h.db, uploadLinkReq)
+	link, err := h.awsService.GetUploadLink(uploadLinkReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -105,66 +114,14 @@ func (h *Handlers) FileUploadLinkHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (h *Handlers) QueryAllHandler(w http.ResponseWriter, r *http.Request) {
-	blogs, err := h.blogService.QueryAllBlogs(h.db)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func parsePostType(typeStr string) types.PostType {
+	postType := types.ALL
+	switch typeStr {
+	case "blog":
+		postType = types.BLOG
+	case "project":
+		postType = types.PROJECT
 	}
 
-	projects, err := h.projectService.QueryAllProjects(h.db)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err := json.NewEncoder(w).Encode(struct {
-		Blogs    []types.Blog    `json:"blogs"`
-		Projects []types.Project `json:"projects"`
-	}{
-		Blogs:    blogs,
-		Projects: projects,
-	}); err != nil {
-		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
-		return
-	}
-}
-
-func (h *Handlers) CreateNewProjectHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var project types.ProjectItem
-	var pId = vars["id"]
-	err := json.NewDecoder(r.Body).Decode(&project)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = h.projectService.CreateNewProject(h.db, project, pId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-}
-
-func (h *Handlers) QueryAllProjectHandler(w http.ResponseWriter, r *http.Request) {
-	println("All projects:")
-	var projects []types.Project
-	projects, _ = h.projectService.QueryAllProjects(h.db)
-
-	if err := json.NewEncoder(w).Encode(projects); err != nil {
-		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
-		return
-	}
-}
-
-func (h *Handlers) QueryProjectHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	projectId := vars["id"]
-	println("projectId:", projectId)
-	if projectId != "" {
-		h.projectService.QueryProject(h.db, projectId)
-	}
+	return postType;
 }
